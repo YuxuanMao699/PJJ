@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一个重要的决定</title>
+<style>
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        overflow: hidden;
+    }
+    .container {
+        background-color: #ffffff;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        width: 90%;
+        max-width: 500px;
+        transition: transform 0.3s ease-in-out;
+    }
+    .container:hover {
+        transform: translateY(-5px);
+    }
+    h1 {
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 24px;
+    }
+    .question {
+        margin-bottom: 30px;
+    }
+    p {
+        font-size: 18px;
+        color: #555;
+        margin-bottom: 20px;
+    }
+    .buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+    .btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    .yes {
+        background-color: #28a745;
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+    .yes:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+    .no {
+        background-color: #dc3545;
+        color: white;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+    .no:hover {
+        animation: shake 0.5s;
+    }
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    .popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s, visibility 0.3s;
+        z-index: 1000;
+    }
+    .popup-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        transform: scale(0.8);
+        transition: transform 0.3s;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+    }
+    .popup.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    .popup.active .popup-content {
+        transform: scale(1);
+    }
+    .popup-content h2 {
+        margin-top: 0;
+        color: #28a745;
+    }
+    .popup-content p {
+        color: #333;
+        font-size: 18px;
+    }
+    .popup-close {
+        margin-top: 20px;
+        padding: 10px 20px;
+        border-radius: 25px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .popup-close:hover {
+        background-color: #0056b3;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>灵魂拷问三连：</h1>
+
+    <div class="question">
+        <p>给个机会带梨汤好不好？</p>
+        <div class="buttons">
+            <button class="btn yes" onclick="showPopup('太棒了！', '希望你的心情像梨汤一样清甜！')">好</button>
+            <button class="btn no" onmouseover="moveButton(this)">不好</button>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>下去溜达买瓶电解质水好不好？</p>
+        <div class="buttons">
+            <button class="btn yes" onclick="showPopup('就知道你最好！', '瞬间感觉充满了电！')">好</button>
+            <button class="btn no" onclick="askAgain(this, '真的不再考虑一下吗？')">不好</button>
+        </div>
+    </div>
+
+    <div class="question">
+        <p>今天早点下班好不好？</p>
+        <div class="buttons">
+            <button class="btn yes" id="yesEarly" style="transform: scale(1.0);">好</button>
+            <button class="btn no" id="noEarly" onclick="shrinkButton()">不好</button>
+        </div>
+    </div>
+</div>
+
+<div class="popup" id="popup">
+    <div class="popup-content">
+        <h2 id="popup-title"></h2>
+        <p id="popup-message"></p>
+        <button class="popup-close" onclick="hidePopup()">关闭</button>
+    </div>
+</div>
+
+<script>
+    // 弹窗相关函数
+    function showPopup(title, message) {
+        document.getElementById('popup-title').innerText = title;
+        document.getElementById('popup-message').innerText = message;
+        document.getElementById('popup').classList.add('active');
+    }
+
+    function hidePopup() {
+        document.getElementById('popup').classList.remove('active');
+    }
+
+    // “不好”按钮的互动
+
+    // 1. 鼠标悬停时按钮“逃跑”
+    function moveButton(btn) {
+        const container = btn.closest('.container');
+        const containerRect = container.getBoundingClientRect();
+        const btnRect = btn.getBoundingClientRect();
+
+        const newTop = Math.random() * (containerRect.height - btnRect.height);
+        const newLeft = Math.random() * (containerRect.width - btnRect.width);
+
+        btn.style.position = 'absolute';
+        btn.style.top = newTop + 'px';
+        btn.style.left = newLeft + 'px';
+    }
+
+    // 2. 点击后改变文字，给你一次反悔的机会
+    function askAgain(btn, message) {
+        btn.innerText = message;
+        btn.onclick = function() {
+            showPopup('好的~.', '听你的~');
+            // 恢复原状
+            btn.innerText = '不好';
+            btn.onclick = function() { askAgain(this, '真的不再考虑一下吗？'); };
+        };
+    }
+
+    // 3. 点击“不好”后，“好”按钮变大，诱惑你点击
+    const yesEarlyBtn = document.getElementById('yesEarly');
+    const noEarlyBtn = document.getElementById('noEarly');
+    let yesScale = 1.0;
+
+    function shrinkButton() {
+        // “好”按钮变大
+        yesScale += 0.2;
+        yesEarlyBtn.style.transform = `scale(${yesScale})`;
+        yesEarlyBtn.innerText = '快点我！';
+
+        // “不好”按钮可以随机换个地方
+        const randomChoice = Math.random();
+        if (randomChoice < 0.3) {
+            noEarlyBtn.style.opacity = '0';
+        } else if (randomChoice < 0.7) {
+            noEarlyBtn.innerHTML = "再想想！";
+        } else {
+            // 什么也不做
+        }
+    }
+    
+    yesEarlyBtn.onclick = function() {
+        showPopup('就知道你会同意的！', '高效工作，然后我们一起迎接美好的傍晚！');
+    };
+
+</script>
+
+</body>
+</html>
